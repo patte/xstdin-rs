@@ -47,8 +47,10 @@ seq 1 10 | xstdin -l -n 2 -- ruby -e 'STDIN.each_line { |line| puts "#$$: #{line
 23014: 9
 ```
 
+## Benchmarks
 MacBook Air, M2, 2023:
 ```bash
+# yes baseline
 yes | pv --rate | cat > /dev/null
 [3.79GiB/s]
 
@@ -60,6 +62,29 @@ yes | pv --rate | xstdin -l cat > /dev/null
 yes | pv --rate | xstdin cat > /dev/null
 [2.64GiB/s]
 
+# big chunks round robin
 yes | pv --rate | xstdin -b 32000 cat > /dev/null
 [3.29GiB/s]
+```
+
+```bash
+# large input
+du -sh input_large.txt
+9.7G	input_large.txt
+
+time pv --rate input_large.txt | xstdin -- cat > /dev/null
+[2.57GiB/s]
+[2.24GiB/s]
+pv --rate input_large.txt  0.11s user 2.10s system 50% cpu 4.343 total
+xstdin -- cat > /dev/null  1.02s user 6.54s system 174% cpu 4.343 total
+
+wc -l input_large.txt 
+ 5219249490 input_large.txt
+
+time pv --rate input_large.txt | xstdin -- wc -l | awk '{s+=$1} END {print s}'
+[1.67GiB/s]
+5219249490
+pv --rate input_large.txt  0.11s user 2.46s system 44% cpu 5.828 total
+xstdin -- wc -l  11.05s user 4.86s system 272% cpu 5.827 total
+awk '{s+=$1} END {print s}'  0.00s user 0.00s system 0% cpu 5.827 total
 ``````
