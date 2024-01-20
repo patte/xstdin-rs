@@ -52,9 +52,14 @@ MacBook Air, M2, 2023:
 yes | pv --rate | cat > /dev/null
 [3.79GiB/s]
 
-yes | pv --rate | xstdin cat > /dev/null
-[51.1MiB/s]
+# strict round robin
+yes | pv --rate | xstdin -l cat > /dev/null
+[1.55MiB/s]
 
- yes | pv --rate | xstdin -b 32000 cat > /dev/null
-[53.7MiB/s]
+# chunked round robin
+yes | pv --rate | xstdin cat > /dev/null
+[2.64GiB/s]
+
+yes | pv --rate | xstdin -b 32000 cat > /dev/null
+[3.29GiB/s]
 ``````
