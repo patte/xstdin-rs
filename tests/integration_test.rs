@@ -116,4 +116,33 @@ mod tests {
         println!("output_lines: {:?}", output_lines);
         assert_eq!(output_lines.len(), 10000);
     }
+
+    #[rstest]
+    fn test_worker_id_substitution() {
+        let mut child = Command::new("cargo")
+            .arg("run")
+            .arg("--")
+            .arg("-n")
+            .arg("2") // 2 workers
+            .arg("echo")
+            .arg("worker {}")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("failed to execute process");
+
+        {
+            let stdin = child.stdin.as_mut().expect("failed to get stdin");
+            stdin
+                .write_all(b"1\n2\n3\n4\n")
+                .expect("failed to write to stdin");
+        }
+
+        let output = child.wait_with_output().expect("failed to wait on child");
+        let output = String::from_utf8(output.stdout).expect("output is not UTF-8");
+        let mut output_lines: Vec<_> = output.lines().collect();
+        output_lines.sort(); // Sorting because output order might not be guaranteed
+
+        assert_eq!(output_lines, vec!["worker 0", "worker 1"]);
+    }
 }

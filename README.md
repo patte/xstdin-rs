@@ -34,7 +34,7 @@ seq 1 10 | xstdin -n 2 cat
 ```
 
 ```bash
-seq 1 10 | xstdin -n 2 -- ruby -e 'STDIN.each_line { |line| puts "#$$: #{line}" }'
+seq 1 10 | xstdin -l -n 2 -- ruby -e 'STDIN.each_line { |line| puts "#$$: #{line}" }'
 23026: 2
 23014: 1
 23026: 4

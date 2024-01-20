@@ -59,9 +59,13 @@ fn main() -> io::Result<()> {
     let mut children = Vec::new();
     //let mut stdin_writers = Vec::new();
     let mut stdin_pipes = Vec::new();
-    for _ in 0..num_workers {
+    for worker_id in 0..num_workers {
         let mut child = Command::new(&command[0])
-            .args(command_args)
+            .args(
+                command_args
+                    .iter()
+                    .map(|s| s.replace("{}", &worker_id.to_string())),
+            )
             .stdin(Stdio::piped())
             .spawn()?;
 
