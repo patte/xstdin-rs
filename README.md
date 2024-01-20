@@ -53,5 +53,8 @@ yes | pv --rate | cat > /dev/null
 [3.79GiB/s]
 
 yes | pv --rate | xstdin cat > /dev/null
-[1.44MiB/s]
+[51.1MiB/s]
+
+ yes | pv --rate | xstdin -b 32000 cat > /dev/null
+[53.7MiB/s]
 ``````

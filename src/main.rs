@@ -1,6 +1,6 @@
 use getopts::Options;
 use std::env;
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::process::{Command, Stdio};
 
 fn print_usage(program: &str, opts: &Options) {
@@ -14,6 +14,7 @@ fn main() -> io::Result<()> {
     // Parse command line options
     let mut opts = Options::new();
     opts.optopt("n", "", "set number of workers (default is 4)", "NUM");
+    opts.optopt("b", "", "set buffer capacity (default is 8KiB)", "SIZE");
     opts.optflag("h", "help", "print this help menu");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
@@ -36,31 +37,35 @@ fn main() -> io::Result<()> {
 
     // Spawn worker subprocesses and create pipes
     let mut children = Vec::new();
-    let mut stdin_pipes = Vec::new();
+    let mut stdin_writers = Vec::new();
     for _ in 0..num_workers {
         let mut child = Command::new(&command[0])
             .args(command_args)
             .stdin(Stdio::piped())
-            .spawn()
-            .expect("Failed to spawn child process");
+            .spawn()?;
 
-        let stdin_pipe = child.stdin.take().expect("Failed to open stdin");
+        let stdin_pipe = child
+            .stdin
+            .take()
+            .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to open stdin"))?;
+        let stdin_writer = BufWriter::new(stdin_pipe);
         children.push(child);
-        stdin_pipes.push(stdin_pipe);
+        stdin_writers.push(stdin_writer);
     }
 
     // Distribute work to workers
-    let mut line_counter = 0;
     let input = io::stdin(); // Use stdin as input
-    for line in input.lock().lines() {
+    let buffered_input =
+        BufReader::with_capacity(matches.opt_get_default("b", 8192).unwrap(), input.lock());
+    let mut line_counter = 0;
+    for line in buffered_input.lines() {
         let line = line?;
-        writeln!(stdin_pipes[line_counter % num_workers], "{}", line)
-            .expect("Failed to write to stdin of child process");
+        writeln!(stdin_writers[line_counter % num_workers], "{}", line)?;
         line_counter += 1;
     }
 
     // Close the pipes to signal the end of input
-    drop(stdin_pipes);
+    drop(stdin_writers);
 
     // Wait for all subprocesses to finish
     for mut child in children {
