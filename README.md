@@ -20,39 +20,29 @@ Options:
 
 ## Examples
 ```bash
-cat examples/input.txt | xstdin -n 2 cat
-line1
-line4
-line6
-line8
-line10
-line12
-line14
-line16
-line2
-line5
-line7
-line9
-line11
-line13
-line15
+seq 1 10 | xstdin -n 2 cat
+1
+3
+5
+7
+9
+2
+4
+6
+8
+10
 ```
 
 ```bash
-cat examples/input.txt | xstdin -n 2 ruby examples/ruby-cat.rb
-74048: line2
-74036: line1
-74048: line5
-74048: line7
-74036: line4
-74048: line9
-74036: line6
-74048: line11
-74036: line8
-74048: line13
-74036: line10
-74048: line15
-74036: line12
-74036: line14
-74036: line16
+seq 1 10 | xstdin -n 2 -- ruby -e 'STDIN.each_line { |line| puts "#$$: #{line}" }'
+23026: 2
+23014: 1
+23026: 4
+23014: 3
+23026: 6
+23014: 5
+23026: 8
+23014: 7
+23026: 10
+23014: 9
 ```
