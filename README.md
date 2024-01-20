@@ -9,8 +9,16 @@ Imagined by [paddor](https://github.com/paddor/). Developed with help by GPT-4.
 cargo install --path .
 ```
 
-## Usage examples
+## Usage
+```
+Usage: xstdin [-n NUM] <command> [<arg1> <arg2> ...]
 
+Options:
+    -n NUM              set number of workers (default is 4)
+    -h, --help          print this help menu
+```
+
+## Examples
 ```bash
 cat examples/input.txt | xstdin -n 2 cat
 line1
