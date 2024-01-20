@@ -49,6 +49,9 @@ seq 1 10 | xstdin -n 2 -- ruby -e 'STDIN.each_line { |line| puts "#$$: #{line}" 
 
 MacBook Air, M2, 2023:
 ```bash
-pv --rate /dev/zero | xstdin -n 8 cat
-[2.45GiB/s]
+yes | pv --rate | cat > /dev/null
+[3.79GiB/s]
+
+yes | pv --rate | xstdin cat > /dev/null
+[1.44MiB/s]
 ``````
