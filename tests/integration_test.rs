@@ -86,11 +86,11 @@ mod tests {
     #[case::small_buffer(&["-b8"])]
     #[case::small_buffer_line_mode(&["-b8", "-l"])]
     fn test_large_input(#[case] args: &[&str]) {
-        let input = (0..10000)
+        let num_lines = 10000;
+        let input = (0..num_lines)
             .map(|i| i.to_string())
             .collect::<Vec<_>>()
-            .join("\n")
-            + "\n";
+            .join("\n");
 
         let mut child = Command::new("cargo")
             .arg("run")
@@ -112,9 +112,12 @@ mod tests {
         let output = child.wait_with_output().expect("failed to wait on child");
         let output = String::from_utf8(output.stdout).expect("output is not UTF-8");
         let mut output_lines: Vec<_> = output.lines().collect();
-        output_lines.sort(); // Sorting because output order might not be guaranteed
-        println!("output_lines: {:?}", output_lines);
-        assert_eq!(output_lines.len(), 10000);
+        output_lines.sort(); // Sorting because order is not guaranteed
+        println!(
+            "last 3 output_lines: {:?}",
+            output_lines[(output_lines.len() - 3)..output_lines.len()].to_vec()
+        );
+        assert_eq!(output_lines.len(), num_lines);
     }
 
     #[rstest]
