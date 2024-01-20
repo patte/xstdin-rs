@@ -57,7 +57,6 @@ fn main() -> io::Result<()> {
 
     // Spawn worker subprocesses and create pipes
     let mut children = Vec::new();
-    //let mut stdin_writers = Vec::new();
     let mut stdin_pipes = Vec::new();
     for worker_id in 0..num_workers {
         let mut child = Command::new(&command[0])
@@ -75,8 +74,6 @@ fn main() -> io::Result<()> {
             .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to open stdin"))?;
 
         children.push(child);
-        //let stdin_writer = BufWriter::new(stdin_pipe);
-        //stdin_writers.push(stdin_writer);
         stdin_pipes.push(stdin_pipe);
     }
 
