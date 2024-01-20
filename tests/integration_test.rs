@@ -1,15 +1,19 @@
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
     use std::io::Write;
     use std::process::{Command, Stdio};
 
-    #[test]
-    fn test_execution() {
+    #[rstest]
+    #[case::default(&[])]
+    #[case::line_mode(&["-l"])]
+    #[case::small_buffer(&["-b8"])]
+    #[case::small_buffer_line_mode(&["-b8", "-l"])]
+    fn test_execution(#[case] args: &[&str]) {
         let mut child = Command::new("cargo")
             .arg("run")
             .arg("--")
-            .arg("-n")
-            .arg("2")
+            .args(args)
             .arg("cat")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -32,13 +36,18 @@ mod tests {
         assert_eq!(lines, vec!["1", "2", "3", "4"]);
     }
 
-    #[test]
-    fn test_concurrency() {
+    #[rstest]
+    #[case::default(&[])]
+    #[case::line_mode(&["-l"])]
+    #[case::small_buffer(&["-b8"])]
+    #[case::small_buffer_line_mode(&["-b8", "-l"])]
+    fn test_concurrency(#[case] args: &[&str]) {
         let start = std::time::Instant::now();
 
         let mut child = Command::new("cargo")
             .arg("run")
             .arg("--")
+            .args(args)
             .arg("-n")
             .arg("2") // 2 workers
             .arg("--")
@@ -71,18 +80,22 @@ mod tests {
         assert!(duration < std::time::Duration::from_secs(2));
     }
 
-    #[test]
-    fn test_large_input() {
+    #[rstest]
+    #[case::default(&[])]
+    #[case::line_mode(&["-l"])]
+    #[case::small_buffer(&["-b8"])]
+    #[case::small_buffer_line_mode(&["-b8", "-l"])]
+    fn test_large_input(#[case] args: &[&str]) {
         let input = (0..10000)
             .map(|i| i.to_string())
             .collect::<Vec<_>>()
-            .join("\n");
+            .join("\n")
+            + "\n";
 
         let mut child = Command::new("cargo")
             .arg("run")
             .arg("--")
-            .arg("-n")
-            .arg("3") // 3 workers
+            .args(args)
             .arg("cat")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -98,8 +111,9 @@ mod tests {
 
         let output = child.wait_with_output().expect("failed to wait on child");
         let output = String::from_utf8(output.stdout).expect("output is not UTF-8");
-        let output_lines: Vec<_> = output.lines().collect();
-
+        let mut output_lines: Vec<_> = output.lines().collect();
+        output_lines.sort(); // Sorting because output order might not be guaranteed
+        println!("output_lines: {:?}", output_lines);
         assert_eq!(output_lines.len(), 10000);
     }
 }
