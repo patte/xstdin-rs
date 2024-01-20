@@ -37,3 +37,22 @@ line11
 line13
 line15
 ```
+
+```bash
+cat examples/input.txt | xstdin -n 2 ruby examples/ruby-cat.rb
+74048: line2
+74036: line1
+74048: line5
+74048: line7
+74036: line4
+74048: line9
+74036: line6
+74048: line11
+74036: line8
+74048: line13
+74036: line10
+74048: line15
+74036: line12
+74036: line14
+74036: line16
+```
