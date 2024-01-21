@@ -1,4 +1,6 @@
-// source: https://internals.rust-lang.org/t/extend-io-bufread-to-read-multiple-lines-at-once/10196
+// source:
+// https://internals.rust-lang.org/t/extend-io-bufread-to-read-multiple-lines-at-once/10196
+// https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=615e0da07bf50e56ae41664dedd0c28c
 
 use std::io;
 
@@ -15,7 +17,7 @@ pub trait ChunkReader: io::BufRead {
         // If a newline in reached within the first 128 bytes, we need only
         // one allocation
         buf.reserve(len + 128);
-        buf.extend_from_slice(&readbuf);
+        buf.extend_from_slice(readbuf);
         self.consume(len);
         len += self.read_until(b'\n', buf)?;
         Ok(len)
