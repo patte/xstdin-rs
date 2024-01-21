@@ -1,5 +1,7 @@
 # xstdin
 
+[![tests](https://github.com/patte/xstdin-rs/actions/workflows/test-and-lint.yml/badge.svg)]
+
 CLI tool for distributing stdin to a set of long-running workers.
 By default, distributes input in chunks of ~8KiB (always on line boundaries) to 4 workers.
 With the `-l` flag, the input is distributed in a strict round-robin fashion, line by line to each worker (comes at a huge performance cost).
