@@ -92,6 +92,12 @@ fn main() -> io::Result<()> {
         for chunk in buffered_input.chunks() {
             let chunk = chunk?;
             stdin_pipes[worker_index].write_all(&chunk)?;
+            // if we reached EOF without a newline, add one
+            // otherwise, the last line is appended to the previous
+            // input to the worker
+            if chunk.last() != Some(&b'\n') {
+                stdin_pipes[worker_index].write_all(b"\n")?;
+            }
             worker_index = (worker_index + 1) % num_workers;
         }
     }
