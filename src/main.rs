@@ -6,7 +6,10 @@ mod chunk_reader;
 use crate::chunk_reader::ChunkReader;
 
 fn print_usage(program: &str, opts: &Options) {
-    let brief = format!("Usage: {} [-n NUM] <command> [<arg1> <arg2> ...]", program);
+    let brief = format!(
+        "Usage: {} [-n NUM] [-b SIZE] [-l] <command> [<arg1> <arg2> ...]",
+        program
+    );
     print!("{}", opts.usage(&brief));
 }
 

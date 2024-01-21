@@ -89,12 +89,14 @@ mod tests {
         let num_lines = 10000;
         let input = (0..num_lines)
             .map(|i| i.to_string())
-            .collect::<Vec<_>>()
+            .collect::<Vec<String>>()
             .join("\n");
 
         let mut child = Command::new("cargo")
             .arg("run")
             .arg("--")
+            .arg("-n")
+            .arg("2") // 2 workers
             .args(args)
             .arg("cat")
             .stdin(Stdio::piped())
@@ -111,13 +113,13 @@ mod tests {
 
         let output = child.wait_with_output().expect("failed to wait on child");
         let output = String::from_utf8(output.stdout).expect("output is not UTF-8");
-        let mut output_lines: Vec<_> = output.lines().collect();
-        output_lines.sort(); // Sorting because order is not guaranteed
-        println!(
-            "last 3 output_lines: {:?}",
-            output_lines[(output_lines.len() - 3)..output_lines.len()].to_vec()
-        );
+        let output_lines: Vec<_> = output.lines().collect();
         assert_eq!(output_lines.len(), num_lines);
+        // lines can't be compared here because the output of the different
+        // 'cat' subprocesses are interleaved concurrently, if we just mix
+        // them like here and split on newlines, we get entries like: "99909991", "",
+        // even though the input to one cat was "9990\n" and to the other "9992".
+        // The tests should be extended to differentiate the output of the workers.
     }
 
     #[rstest]
