@@ -1,5 +1,9 @@
 # xstdin
 
+CLI tool for distributing stdin to a set of long-running workers.
+By default, distributes input in chunks of ~8KiB (always on line boundaries) to 4 workers.
+With the `-l` flag, the input is distributed in a strict round-robin fashion, line by line to each worker (comes at a huge performance cost).
+
 Like `xargs`, but for stdin. Like `parallel`, but keeps a set or workers running.
 Imagined by [paddor](https://github.com/paddor/). Developed with help by GPT-4.
 
@@ -11,10 +15,14 @@ cargo install --path .
 
 ## Usage
 ```
-Usage: xstdin [-n NUM] <command> [<arg1> <arg2> ...]
+Usage: xstdin [-n NUM] [-b SIZE] [-l] <command> [<arg1> <arg2> ...]
 
 Options:
-    -n NUM              set number of workers (default is 4)
+    -n, --workers NUM   set number of workers (default is 4)
+    -b, --buffer-size SIZE
+                        set buffer capacity (default is 8KiB)
+    -l, --line-mode     strictly distribute input by line (default
+                        buffer-size)
     -h, --help          print this help menu
 ```
 
